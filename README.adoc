@@ -1,0 +1,83 @@
+:toc: left
+:toclevels: 4
+:source-highlighter: highlightjs
+:icons: font
+:imagesdir: ./images
+
+= Write You An Actor (System) For Great Good!
+with JBang, JDK 19, records, pattern matching and virtual threads!
+
+== Software Requirements
+
+In order to do this workshop, you need the following:
+
+* Linux or MacOS with shell access, and the following installed:
+    - `git`.
+* JDK 19.
+
+=== Suggested JDK 19 installation
+
+Using https://sdkman.io/[`sdkman`]
+
+  $ sdk install java 19.ea.28-open
+  $ sdk use java 19.ea.28-open
+  $ java -version
+  | openjdk version "19-ea" 2022-09-20
+  | OpenJDK Runtime Environment (build 19-ea+28-2110)
+  | OpenJDK 64-Bit Server VM (build 19-ea+28-2110, mixed mode, sharing)
+
+=== Clone this repository
+
+Once done, you can clone this repo:
+
+----
+git clone https://github.com/todo/todo.git
+----
+
+:sectnums:
+
+=== Introduction (10 minutes)
+
+:sectnums!:
+
+=== What
+
+The https://en.wikipedia.org/wiki/Actor_model[actor model definition] from 1973.
+
+The actor model adopts the philosophy that everything is an actor.
+An actor is a computational entity that, in response to a message it receives, can concurrently:
+
+  * send a finite number of messages to other actors;
+  * create a finite number of new actors;
+  * designate the behavior to be used for the next message it receives.
+
+=== Why
+
+Why the actor model matters:
+
+  * Modelling stateful systems
+  * Distributed systems (e.g. leveraging location transparency)
+  * IoT (e.g. Digital twins)
+  * ...
+
+=== How
+
+BOM of technologies/ instruments we are going to use.
+
+==== Java 19
+
+Features we are going to leverage:
+
+  * records
+  * record patterns
+  * expression switches
+  * sealed type hierarchies
+  * virtual threads
+
+==== JBang
+
+...
+
+:sectnums:
+
+===  (20 minutes)

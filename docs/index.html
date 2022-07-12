@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/blood.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section data-markdown>
+					<textarea data-template>
+						### Write You An Actor (System) For Great Good!
+						with JBang, JDK 19, records, pattern matching and virtual threads!
+					</textarea>
+        </section>
+
+				<!-- REQUIREMENTS -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							### Software Requirements
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							In order to do this workshop, you need the following:
+
+							<!-- TODO: verify the requirements -->
+							
+							1. Linux or MacOS with shell access, and the following installed:
+								- `git`.
+							2. [`jbang`](https://www.jbang.dev/documentation/guide/latest/installation.html)
+							3. JDK 19 (optional?)
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							Suggested JDK 19 installation with [`sdkman`](https://sdkman.io/)
+
+							```bash
+								$ sdk install java 19.ea.28-open
+								$ sdk use java 19.ea.28-open
+								$ java -version
+								| openjdk version "19-ea" 2022-09-20
+								| OpenJDK Runtime Environment (build 19-ea+28-2110)
+								| OpenJDK 64-Bit Server VM (build 19-ea+28-2110, mixed mode, sharing)
+							```
+						</textarea>
+					</section>
+				</section>
+
+				<!-- INTRODUCTION -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							### What
+					
+							The [actor model](https://en.wikipedia.org/wiki/Actor_model) adopts the philosophy that everything is an actor.
+							<br/>
+							An actor is a computational entity that, in response to a message it receives, can concurrently:
+							
+							- send a finite number of messages to other actors;
+							- create a finite number of new actors;
+							- designate the behavior to be used for the next message it receives.
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### Why
+
+							Why the actor model matters:
+					
+							- Modelling stateful systems
+							- Distributed systems (e.g. leveraging location transparency)
+							- IoT (e.g. Digital twins)
+							- ...
+						</textarea>
+					</section>
+				</section>
+
+				<!-- TODO
+				
+				BOM of technologies/ instruments we are going to use.
+
+				==== Java 19
+
+				Features we are going to leverage:
+
+					* records
+					* record patterns
+					* expression switches
+					* sealed type hierarchies
+					* virtual threads
+				-->
+
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

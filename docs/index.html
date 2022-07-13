@@ -97,7 +97,7 @@
 						<textarea data-template>
 							### BOM
 
-							the Bill Of Meterial of the instruments we are going to use
+							**B**ill **O**f **M**aterial of the instruments we are going to use
 						</textarea>
 					</section>
 
@@ -127,6 +127,32 @@
 							| [jbang] Building jar...
 							| Hello World
 							```
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### DIY 1
+
+							- initialize a script:
+							```bash
+							jbang init hello.java
+							```
+
+							- (optional) open it in an editor:
+							<!-- TODO Edo io sono una pippa con gli editor, puoi verificare tu? -->
+							```bash
+							jbang edit --open=[editor] hello.java
+							```
+
+							- configure `jbang` by adding from the second line:
+							```
+							//JAVA 19
+							//JAVAC_OPTIONS --enable-preview --release 19
+							//JAVA_OPTIONS  --enable-preview
+							```
+
+							- use Java 19 idioms and run it!
 						</textarea>
 					</section>
 				</section>

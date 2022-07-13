@@ -91,6 +91,124 @@
 					</section>
 				</section>
 
+				<!-- LANDSCAPE -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							### Erlang
+					
+							```erlang
+							pingponger(Name, Main) ->
+								receive
+									{ping, Count, Ping_PID} ->
+										io:format("~s received ping, count down ~w~n", [Name, Count]),
+										if Count > 0 ->
+											Ping_PID ! {ping, Count - 1, self()},
+											pingponger(Name, Main);
+										true ->
+											exit ("done")
+										end
+								end.
+
+							main(_) ->
+								Ping1_PID = spawn(fun() -> pingponger("pinger", self()) end),
+								Ping2_PID = spawn(fun() -> pingponger("ponger", self()) end),
+								Ping1_PID ! {ping, 10, Ping2_PID}.
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### Elixir
+
+							```elixir
+							defmodule Pingponger do
+								def apply(name) do
+									receive do
+										{:ping, count, sender} ->
+											IO.puts "#{name} received ping, count down #{count}"
+											if count > 0 do
+												send sender, {:ping, count - 1, self()}
+												apply(name)
+											else
+												:ok
+											end
+									end
+								end
+							end
+
+							pid1 = spawn fn -> Pingponger.apply("pinger") end
+							pid2 = spawn fn -> Pingponger.apply("ponger") end
+							send pid1, {:ping, 10, pid2}
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### Scala / Akka untyped
+
+							```scala
+							case class Ping(count: Int)
+
+							class Pingponger extends Actor {
+								def receive = {
+									case Ping(count) =>
+										println(s"${self.path} received ping, count down $count")
+										if (count > 0) {
+											sender() ! Ping(count - 1)
+										} else {
+											System.exit(0)
+										}
+								}
+							}
+							
+							val system = ActorSystem("pingpong")
+							val pinger = system.actorOf(Props[Pingponger](), "pinger")
+							val ponger = system.actorOf(Props[Pingponger](), "ponger")
+							pinger.tell(Ping(10), ponger)
+							```
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### Scala / Akka typed
+
+							```scala
+							case class Ping(count: Int, replyTo: ActorRef[Ping])
+
+							object Pingponger {
+								def apply(): Behavior[Ping] = Behaviors.receive { (context, ping) =>
+									println(s"${context.self.path} received ping, count down ${ping.count}")
+									if (ping.count > 0) {
+										ping.replyTo ! Ping(ping.count - 1, context.self)
+									} else {
+										System.exit(0)
+									}
+
+									Behaviors.same
+								}
+							}
+
+							object Main {
+								def apply(): Behavior[NotUsed] =
+									Behaviors.setup { context =>
+										val pinger = context.spawn(Pingponger(), "pinger")
+										val ponger = context.spawn(Pingponger(), "ponger")
+										pinger ! Ping(10, ponger)
+										
+										Behaviors.empty
+									}
+							}
+
+							ActorSystem(Main(), "PingPongDemo")
+							```
+						</textarea>
+					</section>
+				</section>
+
 				<!-- BOM -->
 				<section>
 					<section data-markdown>
@@ -132,7 +250,7 @@
 
 					<section data-markdown>
 						<textarea data-template>
-							### DIY 1
+							### DIY 1/hello.java
 
 							- initialize a script:
 							```bash
@@ -152,7 +270,70 @@
 							//JAVA_OPTIONS  --enable-preview
 							```
 
-							- use Java 19 idioms and run it!
+							- (optional) use Java 19 idioms
+							- run it!
+						</textarea>
+					</section>
+				</section>
+
+				<!-- JAVA 19 FEATURES -->
+				<section>
+					<!-- RECORDS -->
+					<section data-markdown>
+						<textarea data-template>
+							### Records
+
+							...
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### DIY 2/records.java
+
+							```
+							record User(String name);
+							```
+						</textarea>
+					</section>
+
+					<!-- SEALED TYPE HIERARCHIES -->
+					<section data-markdown>
+						<textarea data-template>
+							### Sealed Type Hierarchies
+
+							...
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### DIY 2/sealed.java
+
+							```
+							sealed interface ToGreet {};
+							record User(String name) implements ToGreet {};
+							record World() implements ToGreet {};
+							```
+						</textarea>
+					</section>
+
+					<!-- PATTERN MATCHING -->
+					<section data-markdown>
+						<textarea data-template>
+							### Pattern matching
+
+							...
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### DIY 2/pattern.java
+
+							```
+							switch (Integer.valueOf(args.length)) {
+								case Integer i when i > 0 -> out.println("Hello " + args[0]);
+								default -> out.println("Hello World");
+							}
+							```
 						</textarea>
 					</section>
 				</section>

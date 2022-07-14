@@ -87,9 +87,18 @@ public interface ChatServer {
 
     class ClientManager {
 
-        public ClientManager() { }
+        private final List<Address<ChannelActor.ChannelProtocol>> clients;
+
+        public ClientManager() {
+            this.clients = new ArrayList<>();
+        }
 
         Effect<ClientManagerProtocol> apply(ClientManagerProtocol msg) {
+            switch (msg) {
+                case ClientConnected cc -> clients.add(cc.addr());
+                case LineRead lr ->
+                    clients.forEach(client -> client.tell(new ChannelActor.WriteLine(lr.payload())));
+            }
             return Stay();
         }
     }

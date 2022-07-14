@@ -16,9 +16,7 @@
  *
  */
 
-package io.github.evacchi.loomchat;
-
-import io.github.evacchi.LoomActor;
+package io.github.evacchi.typed.loomchat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,15 +24,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.util.function.Function;
 
-import static io.github.evacchi.LoomActor.*;
+import static io.github.evacchi.TypedLoomActor.*;
 
 class ChannelActors {
-    sealed interface ChannelMessage {}
-    static record LineRead(String payload) implements ChannelMessage {}
-    static record WriteLine(String payload) implements ChannelMessage {}
+    record WriteLine(String payload) {}
 
-    static record PerformReadLine() implements ChannelMessage {}
+    record PerformReadLine() {}
 
     final BufferedReader in;
     final PrintWriter out;
@@ -48,39 +45,41 @@ class ChannelActors {
         }
     }
 
-    Behavior<ChannelMessage> reader(Address self, Address addr) {
-        self.tell(new PerformReadLine());
+    final class Reader<T> {
+        final Function<String, T> fn;
+        final Address<T> addr;
 
-        return msg -> {
-            switch(msg) {
-                case PerformReadLine prl -> {
-                    try {
-                        return switch (in.readLine()) {
-                            case null -> { yield Die; }
-                            case String line -> {
-                                addr.tell(new LineRead(line));
-                                self.tell(new PerformReadLine());
-                                yield Stay;
-                            }
-                        };
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
+        public Reader(Address<T> addr, Function<String, T> fn) {
+            this.fn = fn;
+            this.addr = addr;
+        }
+
+        <T> Effect<PerformReadLine> read(Address<PerformReadLine> self) {
+            try {
+                return switch (in.readLine()) {
+                    case null -> { yield Die(); }
+                    case String line -> {
+                        addr.tell(fn.apply(line));
+                        self.tell(new PerformReadLine());
+                        yield Stay();
                     }
-                }
-                default -> throw new RuntimeException("Unhandled message " + msg);
+                };
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
-        };
+        }
+
+        void start(Address<PerformReadLine> self) {
+            self.tell(new PerformReadLine());
+        }
     }
 
-    Behavior writer() {
-        return msg -> {
-            switch (msg) {
-                case WriteLine(var payload) -> {
-                    out.println(payload);
-                }
-                default -> throw new RuntimeException("Unhandled message " + msg);
-            }
-            return Stay;
-        };
+    <T> Reader<T> reader(Address<T> addr, Function<String, T> fn) {
+        return new Reader<>(addr, fn);
+    }
+
+    Effect<WriteLine> writer(WriteLine wl) {
+        out.println(wl.payload());
+        return Stay();
     }
 }

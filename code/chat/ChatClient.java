@@ -19,38 +19,44 @@
 //JAVAC_OPTIONS --enable-preview --release 19
 //JAVA_OPTIONS  --enable-preview
 //SOURCES ChannelActors.java
-//SOURCES ../actor/TypedActor.java
+//SOURCES ../../TypedLoomActor.java
 //DEPS com.fasterxml.jackson.core:jackson-databind:2.13.0
 
-package io.github.evacchi;
+package io.github.evacchi.typed.loomchat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.evacchi.TypedActor;
+import io.github.evacchi.TypedLoomActor;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.util.Scanner;
 
-import static io.github.evacchi.TypedActor.*;
-import static java.lang.System.*;
+import static io.github.evacchi.TypedLoomActor.*;
+import static java.lang.System.in;
+import static java.lang.System.out;
 
 public interface ChatClient {
 
     String host = "localhost";
     int portNumber = 4444;
-    TypedActor.System system = new TypedActor.System();
+    TypedLoomActor.System system = new TypedLoomActor.System();
 
-    record Message(String user, String text) {}
+    sealed interface ClientProtocol { }
+    record Message(String user, String text) implements ClientProtocol {}
+    record LineRead(String payload) implements ClientProtocol {}
 
     static void main(String[] args) throws IOException {
         var userName = args[0];
 
         var socket = new Socket(host, portNumber);
         var channel = new ChannelActors(socket);
-        var writer = system.actorOf(self -> channel.writer());
-        var client = system.actorOf(self -> client(self, writer));
-        system.actorOf(self -> channel.reader(self, client));
+        Address<ChannelActors.WriteLine> writer = system.actorOf(self -> msg -> channel.writer(msg));
+        Address<ClientProtocol> client = system.actorOf(self -> msg -> client(writer, msg));
+        ChannelActors.Reader<ClientProtocol> reader =
+                channel.reader(client, (line) -> new LineRead(line));
+        reader.start(system.actorOf(self -> msg -> reader.read(self)));
 
         out.printf("Login............... %s\n", userName);
 
@@ -64,26 +70,23 @@ public interface ChatClient {
         }
     }
 
-    static LoomActor.Behavior client(Address self, Address writer) {
+    static Effect<ClientProtocol> client(Address<ChannelActors.WriteLine> writer, ClientProtocol msg) {
         var mapper = new ObjectMapper();
 
-        return msg -> {
-            try {
-                switch (msg) {
-                    case Message m -> {
-                        var jsonMsg = mapper.writeValueAsString(m);
-                        writer.tell(new ChannelActors.WriteLine(jsonMsg));
-                    }
-                    case ChannelActors.LineRead(var payload) -> {
-                        switch (mapper.readValue(payload.trim(), Message.class)) {
-                            case Message(var user, var text) -> out.printf("%s > %s\n", user, text);
-                        }
-                    }
-                    default -> throw new RuntimeException("Unhandled message " + msg);
+        try {
+            switch (msg) {
+                case Message m -> {
+                    var jsonMsg = mapper.writeValueAsString(m);
+                    writer.tell(new ChannelActors.WriteLine(jsonMsg));
                 }
-                return Stay;
-            } catch(JsonProcessingException e) { throw new UncheckedIOException(e); }
-        };
+                case LineRead(var payload) -> {
+                    switch (mapper.readValue(payload.trim(), Message.class)) {
+                        case Message(var user, var text) -> out.printf("%s > %s\n", user, text);
+                    }
+                }
+            }
+            return Stay();
+        } catch(JsonProcessingException e) { throw new UncheckedIOException(e); }
     }
 
 }

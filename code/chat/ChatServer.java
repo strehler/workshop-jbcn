@@ -20,52 +20,61 @@
 //JAVAC_OPTIONS --enable-preview --release 19
 //JAVA_OPTIONS  --enable-preview
 //SOURCES ChannelActors.java
-//SOURCES ../actor/TypedActor.java
+//SOURCES ../../TypedLoomActor.java
 
-package io.github.evacchi.chat;
+package io.github.evacchi.typed.loomchat;
 
-import io.github.evacchi.TypedActor;
+import io.github.evacchi.TypedLoomActor;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.List;
 
-import static io.github.evacchi.TypedActor.*;
-import static java.lang.System.*;
+import static io.github.evacchi.TypedLoomActor.*;
+import static java.lang.System.out;
 
 public interface ChatServer {
-    record ClientConnected(Address addr) { }
 
-    TypedActor.System system = new TypedActor.System();
+    sealed interface ClientManagerProtocol { }
+    record ClientConnected(Address addr) implements ClientManagerProtocol { }
+    record LineRead(String payload) implements ClientManagerProtocol {}
+
+    TypedLoomActor.System system = new TypedLoomActor.System();
     int PORT = 4444;
 
     static void main(String... args) throws IOException, InterruptedException {
         var serverSocket = new ServerSocket(PORT);
         out.printf("Server started at %s.\n", serverSocket.getLocalSocketAddress());
 
-        var clientManager =
-                system.actorOf(self -> clientManager());
+        Address<ClientManagerProtocol> clientManager =
+                system.actorOf(self -> msg -> clientManager(msg));
 
         while (true) {
             var socket = serverSocket.accept();
             var channel = new ChannelActors(socket);
-            system.actorOf(self -> channel.reader(self, clientManager));
-            var writer = system.actorOf(self -> channel.writer());
+            ChannelActors.Reader<ClientManagerProtocol> reader =
+                    channel.reader(clientManager, (line) -> new LineRead(line));
+            reader.start(system.actorOf(self -> msg -> reader.read(self)));
+            Address<ChannelActors.WriteLine> writer = system.actorOf(self -> msg -> channel.writer(msg));
             clientManager.tell(new ClientConnected(writer));
         }
     }
 
-    static Behavior clientManager() {
-        var clients = new ArrayList<Address>();
-        return msg -> {
-            switch (msg) {
-                case ClientConnected(var address) -> clients.add(address);
-                case ChannelActors.LineRead(var payload) ->
-                    clients.forEach(client -> client.tell(new ChannelActors.WriteLine(payload)));
-                default -> throw new RuntimeException("Unhandled message " + msg);
+    static Effect<ClientManagerProtocol> clientManager(ClientManagerProtocol msg) {
+        return clientManager(msg, new ArrayList());
+    }
+
+    static Effect<ClientManagerProtocol> clientManager(ClientManagerProtocol msg, List<Address<ChannelActors.WriteLine>> clients) {
+        return switch (msg) {
+            case ClientConnected(var address) -> {
+                clients.add(address);
+                yield Become(m -> clientManager(m, clients));
             }
-            return Stay;
+            case LineRead(var payload) -> {
+                clients.forEach(client -> client.tell(new ChannelActors.WriteLine(payload)));
+                yield Stay();
+            }
         };
     }
 

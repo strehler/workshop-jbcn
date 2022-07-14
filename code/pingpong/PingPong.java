@@ -26,9 +26,9 @@ public interface PingPong {
         ponger.tell(new Ping(pinger));
     }
     static Effect<Ping> pongerBehavior(Address<Ping> self, Ping msg, int counter) {
-
+        return Stay();
     }
     static Effect<Pong> pingerBehavior(Address<Pong> self, Pong msg) {
-
+        return Stay();
     }
 }

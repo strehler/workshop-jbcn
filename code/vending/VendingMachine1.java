@@ -71,8 +71,7 @@ public interface VendingMachine {
     static Behavior<Vend> vend(Address<Vend> self, int change) {
         return message -> switch(message) {
             case Choice c -> {
-                vendProduct(c.product());
-                releaseChange(change);
+                // ...
                 yield Become(initial(self));
             }
             default -> Stay(); // ignore message, stay in this state

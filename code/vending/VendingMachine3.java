@@ -32,10 +32,8 @@ public interface VendingMachine {
     }
     static Behavior<Vend> initial(Address<Vend> self) {
         return message -> {
-            if (message instanceof Coin c) {
-                onFirstCoin();
-                return Become(waitCoin(self, c.amount()));
-            } else return Stay(); // ignore message, stay in this state
+            // ...
+            return Stay(); // ignore message, stay in this state
         };
     }
     static void onFirstCoin() {
@@ -45,14 +43,11 @@ public interface VendingMachine {
     static Behavior<Vend> waitCoin(Address<Vend> self, int counter) {
         return message -> switch(message) {
             case Coin c when counter + c.amount() < 100 -> {
-                var count = counter + c.amount();
-                onCoin(count);
+                // ...
                 yield Become(waitCoin(self, count));
             }
             case Coin c -> {
-                var count = counter + c.amount();
-                var change = counter + c.amount() - 100;
-                onLastCoin(count);
+                // ...
                 yield Become(vend(self, change));
             }
             default -> Stay(); // ignore message, stay in this state
@@ -71,8 +66,7 @@ public interface VendingMachine {
     static Behavior<Vend> vend(Address<Vend> self, int change) {
         return message -> switch(message) {
             case Choice c -> {
-                vendProduct(c.product());
-                releaseChange(change);
+                // ...
                 yield Become(initial(self));
             }
             default -> Stay(); // ignore message, stay in this state

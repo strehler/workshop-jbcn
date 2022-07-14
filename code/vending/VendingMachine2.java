@@ -33,32 +33,42 @@ public interface VendingMachine {
     static Behavior<Vend> initial(Address<Vend> self) {
         return message -> {
             if (message instanceof Coin c) {
-                out.println("Received first coin: " + c.amount);
+                onFirstCoin();
                 return Become(waitCoin(self, c.amount()));
             } else return Stay(); // ignore message, stay in this state
         };
     }
+    static void onFirstCoin() {
+        out.println("Received first coin: " + c.amount);
+    }
+
     static Behavior<Vend> waitCoin(Address<Vend> self, int counter) {
         return message -> switch(message) {
             case Coin c when counter + c.amount() < 100 -> {
-                var count = counter + c.amount();
-                out.println("Received coin: " + count + " of 100");
+                // ...
                 yield Become(waitCoin(self, count));
             }
             case Coin c -> {
-                var count = counter + c.amount();
-                out.println("Received last coin: " + count + " of 100");
-                var change = counter + c.amount() - 100;
+                // ...
                 yield Become(vend(self, change));
             }
             default -> Stay(); // ignore message, stay in this state
         };
     }
+
+    static void onCoin(int count) {
+        out.println("Received coin: " + count + " of 100");
+    }
+
+    static void onLastCoin(int count) {
+        out.println("Received last coin: " + count + " of 100");
+    }
+
+
     static Behavior<Vend> vend(Address<Vend> self, int change) {
         return message -> switch(message) {
             case Choice c -> {
-                vendProduct(c.product());
-                releaseChange(change);
+                // ...
                 yield Become(initial(self));
             }
             default -> Stay(); // ignore message, stay in this state

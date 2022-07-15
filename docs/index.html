@@ -59,465 +59,7 @@
 							```
 						</textarea>
 					</section>
-				</section>
 
-				<!-- INTRODUCTION -->
-				<section>
-					<section data-markdown>
-						<textarea data-template>
-							### What's new with the JDK?
-
-							- JDK 17 is the LTS
-							- You should not wait to upgrade
-							- A walkthrough of the latest changes in JDK 17
-							- Bonus: a sneak peek in what is possible with JDK 19
-						</textarea>
-
-						<!-- "we could just do yet another boring overview of the syntax but we won't!" -->
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Finding a Running Example
-
-							- An example to exercise all of the brand new JDK features
-							- In a fun way
-							- You will learn all the new features
-							- ...with a nontrivial example
-							- ...but also how to implement your own actor system!
-						</textarea>
-					</section>
-				</section>
-
-
-				<!-- THE ACTOR MODEL -->
-
-				<section data-markdown>
-					<textarea data-template>
-						### The Actor Model
-				
-						- Concurrency Model
-						- Simple
-						- "Single-Thread" reasoning
-					</textarea>
-				</section>
-
-				<section data-markdown>
-					<textarea data-template>
-						### The Actor Model
-				
-						- Modelling stateful systems
-						- Distributed systems (e.g. leveraging location transparency)
-						- IoT (e.g. Digital twins)
-						- ...
-					</textarea>
-				</section>
-
-
-				<!-- HOW DOES IT LOOK LIKE -->
-				<section>
-					<section data-markdown>
-						<textarea data-template>
-							### How does an actor look like?
-						</textarea>
-					</section>
-					<section data-markdown>
-						<textarea data-template>
-							### Scala / Akka untyped
-
-							```scala
-							case class Ping(count: Int)
-
-							class Pingponger extends Actor {
-								def receive = {
-								case Ping(count) =>
-									println(s"${self.path} received ping, count down $count")
-									if (count > 0) {
-									sender() ! Ping(count - 1)
-									} else {
-									System.exit(0)
-									}
-								}
-							}
-							
-							val system = ActorSystem("pingpong")
-							val pinger = system.actorOf(Props[Pingponger](), "pinger")
-							val ponger = system.actorOf(Props[Pingponger](), "ponger")
-							pinger.tell(Ping(10), ponger)
-							```
-						</textarea>
-					</section>	
-				</section>
-
-
-				<!-- HOW DOES IT WORK -->
-				<section>
-					<section data-markdown>
-						<textarea data-template>
-							### How does an actor work?
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							
-							An [actor](https://en.wikipedia.org/wiki/Actor_model) is a **computational entity** that, 
-							*in response to a message* it receives, can concurrently:
-							
-							- **send** a finite number of messages to other actors;
-							- **create** a finite number of new actors;
-							- **designate the behavior** to be used for the next message it receives.
-
-							"Everything" is an actor.
-						</textarea>
-					</section>
-				</section>
-
-				<!--  THE ISSUE: JDK PRE-17 WITH ACTORS SUCKS -->
-				<section>
-					<section data-markdown>
-						<textarea data-template>
-							### Java + Akka Classic
-						</textarea>
-					</section>
-					
-					<section data-markdown>
-						<textarea data-template>
-							### Akka Classic
-							- Untyped actors in the style of Akka Classic
-							- clunky to write in pre-17:
-
-								- no concise way to express messages
-								- no tidy syntax to match against the types of the incoming messages
-								- no tidy way to represent closed type hiearchies
-							
-						</textarea>
-					</section>
-
-
-					<!--  we may also show that it sucks and show all the workarounds 
-						Akka did in the past to make it nicer for Java -->
-
-					<section data-markdown>
-						<textarea data-template>
-							### Java / Akka untyped
-
-							```java
-							...
-							```
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Akka Classic with Java 17+
-
-							- records
-							- switch expressions and pattern matching
-							- sealed type hierarchies (exhaustiveness check).
-							
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Bonus Java 19
-
-							- record patterns (destructuring match)
-							- virtual threads!
-						</textarea>
-					</section>
-
-				</section>
-
-
-				<!-- JDK 17+ TO THE RESCUE -->
-				<section>
-					<!-- JAVA 19 FEATURES -->
-
-					<section data-markdown>
-						<textarea data-template>
-							### Java 17+
-						</textarea>
-					</section>
-
-
-
-					<!-- RECORDS -->
-					<section data-markdown>
-						<textarea data-template>
-							### Records
-
-							...
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### DIY 2/records.java
-
-							```
-							record User(String name) {}
-							```
-						</textarea>
-					</section>
-
-					<!-- SEALED TYPE HIERARCHIES -->
-					<section data-markdown>
-						<textarea data-template>
-							### Sealed Type Hierarchies
-
-							...
-						</textarea>
-					</section>
-					<section data-markdown>
-						<textarea data-template>
-							### DIY 2/sealed.java
-
-							```
-							sealed interface GreetingTarget {};
-							record User(String name) implements GreetingTarget {};
-							record World() implements GreetingTarget {};
-							```
-						</textarea>
-					</section>
-
-					<!-- PATTERN MATCHING -->
-					<section data-markdown>
-						<textarea data-template>
-							### Pattern matching
-
-							...
-						</textarea>
-					</section>
-					<section data-markdown>
-						<textarea data-template>
-							### DIY 2/pattern.java
-
-							```
-							GreetingTarget tgt = ... 
-							switch (tgt) {
-								case User u -> out.println("Hello " + u.name());
-								case World w -> out.println("Hello World");
-							}
-							```
-						</textarea>
-					</section>
-					<section data-markdown>
-						<textarea data-template>
-							### DIY 2/pattern.java
-
-							```
-							GreetingTarget tgt = ... 
-							switch (tgt) {
-								case User(var name) -> out.println("Hello " + name);
-								case World w -> out.println("Hello World");
-							}
-							```
-						</textarea>
-					</section>
-				</section>	
-
-
-					
-				<section>
-
-				<section data-markdown>
-					<textarea data-template>
-						### Java 19 +  Akka untyped
-					</textarea>
-				</section>
-
-
-				<!-- we show the "ugly" example again -->
-				<section data-markdown>
-					<textarea data-template>
-						### Java + Akka untyped
-
-						```java
-						...
-						```
-					</textarea>
-				</section>
-
-
-				<!-- we show the cool version now -->
-				<section data-markdown>
-					<textarea data-template>
-						### Java 19 + Akka untyped
-
-						```java
-						...
-						```
-					</textarea>
-				</section>
-
-			</section>
-
-
-
-
-
-			<section>
-				<!-- LANDSCAPE -->
-					
-					<section data-markdown>
-						<textarea data-template>
-							### Other Runtimes
-						</textarea>
-					</section>
-
-
-					<!-- we can show the cool version again for reference -->
-					<section data-markdown>
-						<textarea data-template>
-							### Java 19 + Akka untyped
-
-							```java
-							...
-							```
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Erlang
-					
-							```erlang
-							pingponger(Name, Main) ->
-								receive
-									{ping, Count, Ping_PID} ->
-										io:format("~s received ping, count down ~w~n", [Name, Count]),
-										if Count > 0 ->
-											Ping_PID ! {ping, Count - 1, self()},
-											pingponger(Name, Main);
-										true ->
-											exit ("done")
-										end
-								end.
-
-							main(_) ->
-								Ping1_PID = spawn(fun() -> pingponger("pinger", self()) end),
-								Ping2_PID = spawn(fun() -> pingponger("ponger", self()) end),
-								Ping1_PID ! {ping, 10, Ping2_PID}.
-							```
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Elixir
-
-							```elixir
-							defmodule Pingponger do
-								def apply(name) do
-									receive do
-										{:ping, count, sender} ->
-											IO.puts "#{name} received ping, count down #{count}"
-											if count > 0 do
-												send sender, {:ping, count - 1, self()}
-												apply(name)
-											else
-												:ok
-											end
-									end
-								end
-							end
-
-							pid1 = spawn fn -> Pingponger.apply("pinger") end
-							pid2 = spawn fn -> Pingponger.apply("ponger") end
-							send pid1, {:ping, 10, pid2}
-							```
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Scala / Akka untyped
-
-							```scala
-							case class Ping(count: Int)
-
-							class Pingponger extends Actor {
-								def receive = {
-									case Ping(count) =>
-										println(s"${self.path} received ping, count down $count")
-										if (count > 0) {
-											sender() ! Ping(count - 1)
-										} else {
-											System.exit(0)
-										}
-								}
-							}
-							
-							val system = ActorSystem("pingpong")
-							val pinger = system.actorOf(Props[Pingponger](), "pinger")
-							val ponger = system.actorOf(Props[Pingponger](), "ponger")
-							pinger.tell(Ping(10), ponger)
-							```
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Scala / Akka typed
-
-							```scala
-							case class Ping(count: Int, replyTo: ActorRef[Ping])
-
-							object Pingponger {
-								def apply(): Behavior[Ping] = Behaviors.receive { (context, ping) =>
-									println(s"${context.self.path} received ping, count down ${ping.count}")
-									if (ping.count > 0) {
-										ping.replyTo ! Ping(ping.count - 1, context.self)
-									} else {
-										System.exit(0)
-									}
-
-									Behaviors.same
-								}
-							}
-
-							object Main {
-								def apply(): Behavior[NotUsed] =
-									Behaviors.setup { context =>
-										val pinger = context.spawn(Pingponger(), "pinger")
-										val ponger = context.spawn(Pingponger(), "ponger")
-										pinger ! Ping(10, ponger)
-										
-										Behaviors.empty
-									}
-							}
-
-							ActorSystem(Main(), "PingPongDemo")
-							```
-						</textarea>
-					</section>
-				</section>
-
-				<!-- BOM -->
-				<section>
-					<section data-markdown>
-						<textarea data-template>
-							### BOM
-
-							**B**ill **O**f **M**aterial of the tools we are going to use
-						</textarea>
-					</section>
-
-					<section data-markdown>
-						<textarea data-template>
-							### Java 19
-
-							Features we are going to leverage:
-
-							- records
-							- record patterns
-							- expression switches
-							- sealed type hierarchies
-							- virtual threads
-						</textarea>
-					</section>
 
 					<section data-markdown>
 						<textarea data-template>
@@ -560,8 +102,347 @@
 							- run it!
 						</textarea>
 					</section>
+				</section>
+
+				
+
+				<!-- INTRODUCTION -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							### What's new with the JDK?
+
+							- JDK 17 is the LTS
+							- You should not wait to upgrade
+							- A walkthrough of the latest changes in JDK 17
+							- Bonus: a sneak peek in what is possible with JDK 19
+						</textarea>
+
+						<!-- "we could just do yet another boring overview of the syntax but we won't!" -->
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### Finding a Running Example
+
+							- An example to exercise brand new JDK features
+							- In a fun way
+							- You will learn all the new features
+							- ...with a nontrivial example (an actor runtime!)
+						</textarea>
+					</section>
+				</section>
+
+
+
+				<!-- THE ACTOR MODEL -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							### The Actor Model
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<!-- practical example, test jbang env -->
+						<textarea data-template>
+							Ping Pong!
+						</textarea>
+					</section>
+
+
+					<section data-markdown>
+						<textarea data-template>
+						### The Actor Model
+
+						- Concurrency Model
+						- Simple
+						- "Single-Thread" reasoning
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### The Actor Model
+					
+							- Modelling stateful systems
+							- Distributed systems (e.g. leveraging location transparency)
+							- IoT (e.g. Digital twins)
+							- ...
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							
+							An [actor](https://en.wikipedia.org/wiki/Actor_model) is a **computational entity** that, 
+							*in response to a message* it receives, can concurrently:
+							
+							- **send** a finite number of messages to other actors;
+							- **create** a finite number of new actors;
+							- **designate the behavior** to be used for the next message it receives.
+
+							"Everything" is an actor.
+						</textarea>
+					</section>
+				</section>
+
+				<section>
+					<!-- LANDSCAPE -->
+						
+	
+						<!-- we can show the cool version again for reference -->
+	
+						<section data-markdown>
+							<textarea data-template>
+								### Erlang
+						
+								```erlang
+								pingponger(Name, Main) ->
+									receive
+										{ping, Count, Ping_PID} ->
+											io:format("~s received ping, count down ~w~n", [Name, Count]),
+											if Count > 0 ->
+												Ping_PID ! {ping, Count - 1, self()},
+												pingponger(Name, Main);
+											true ->
+												exit ("done")
+											end
+									end.
+	
+								main(_) ->
+									Ping1_PID = spawn(fun() -> pingponger("pinger", self()) end),
+									Ping2_PID = spawn(fun() -> pingponger("ponger", self()) end),
+									Ping1_PID ! {ping, 10, Ping2_PID}.
+								```
+							</textarea>
+						</section>
+	
+						<section data-markdown>
+							<textarea data-template>
+								### Elixir
+	
+								```elixir
+								defmodule Pingponger do
+									def apply(name) do
+										receive do
+											{:ping, count, sender} ->
+												IO.puts "#{name} received ping, count down #{count}"
+												if count > 0 do
+													send sender, {:ping, count - 1, self()}
+													apply(name)
+												else
+													:ok
+												end
+										end
+									end
+								end
+	
+								pid1 = spawn fn -> Pingponger.apply("pinger") end
+								pid2 = spawn fn -> Pingponger.apply("ponger") end
+								send pid1, {:ping, 10, pid2}
+								```
+							</textarea>
+						</section>
+	
+						<section data-markdown>
+							<textarea data-template>
+								### Scala / Akka untyped
+	
+								```scala
+								case class Ping(count: Int)
+	
+								class Pingponger extends Actor {
+									def receive = {
+										case Ping(count) =>
+											println(s"${self.path} received ping, count down $count")
+											if (count > 0) {
+												sender() ! Ping(count - 1)
+											} else {
+												System.exit(0)
+											}
+									}
+								}
+								
+								val system = ActorSystem("pingpong")
+								val pinger = system.actorOf(Props[Pingponger](), "pinger")
+								val ponger = system.actorOf(Props[Pingponger](), "ponger")
+								pinger.tell(Ping(10), ponger)
+								```
+							</textarea>
+						</section>
+	
+						<section data-markdown>
+							<textarea data-template>
+								### Scala / Akka typed
+	
+								```scala
+								case class Ping(count: Int, replyTo: ActorRef[Ping])
+	
+								object Pingponger {
+									def apply(): Behavior[Ping] = Behaviors.receive { (context, ping) =>
+										println(s"${context.self.path} received ping, count down ${ping.count}")
+										if (ping.count > 0) {
+											ping.replyTo ! Ping(ping.count - 1, context.self)
+										} else {
+											System.exit(0)
+										}
+	
+										Behaviors.same
+									}
+								}
+	
+								object Main {
+									def apply(): Behavior[NotUsed] =
+										Behaviors.setup { context =>
+											val pinger = context.spawn(Pingponger(), "pinger")
+											val ponger = context.spawn(Pingponger(), "ponger")
+											pinger ! Ping(10, ponger)
+											
+											Behaviors.empty
+										}
+								}
+	
+								ActorSystem(Main(), "PingPongDemo")
+								```
+							</textarea>
+						</section>
+					</section>
+	
+
+				<!--  THE ISSUE: JDK PRE-17 WITH ACTORS SUCKS -->
+				<section>
+					<section data-markdown>
+						<textarea data-template>
+							### Java + Akka 
+						</textarea>
+					</section>
+
+					<!-- Discuss example -->
+					<!--  we may also show that it sucks and show all the workarounds 
+						Akka did in the past to make it nicer for Java -->
+
+					<section data-markdown>
+						<textarea data-template>
+							### Java + Akka
+
+							```java
+							@Override
+							public Receive<Greet> createReceive() {
+								return newReceiveBuilder()
+									.onMessage(Greet.class, this::onGreet)
+								.build();
+							}
+							```
+
+							https://doc.akka.io/docs/akka/2.4/java/untyped-actors.html
+						</textarea>
+					</section>
+
+					
+					<section data-markdown>
+						<textarea data-template>
+							### Akka 
+							- clunky to write in pre-17:
+
+								- no concise way to express messages
+								- no tidy syntax to match against the types of the incoming messages
+								- no tidy way to represent closed type hiearchies
+							
+						</textarea>
+					</section>
+
+
+					<section data-markdown>
+						<textarea data-template>
+							### Java 17+
+
+							- records
+							- switch expressions and pattern matching
+							- sealed type hierarchies (exhaustiveness check).
+							
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+							### Bonus Java 19
+
+							- record patterns (destructuring match)
+							- virtual threads!
+						</textarea>
+					</section>
 
 				</section>
+
+
+				<!-- JDK 17+ TO THE RESCUE -->
+				<section>
+					<!-- JAVA 19 FEATURES -->
+
+					<section data-markdown>
+						<textarea data-template>
+							### Java 17+
+						</textarea>
+					</section>
+
+
+
+					<section data-markdown>
+						<textarea data-template>
+							### Records
+
+							```
+							record User(String name) {}
+							```
+						</textarea>
+					</section>
+
+					<!-- SEALED TYPE HIERARCHIES -->
+					<section data-markdown>
+						<textarea data-template>
+							### Sealed Type Hierarchies
+
+							```
+							sealed interface GreetingTarget {};
+							record User(String name) implements GreetingTarget {};
+							record World() implements GreetingTarget {};
+							```
+						</textarea>
+					</section>
+
+					<!-- PATTERN MATCHING -->
+					<section data-markdown>
+						<textarea data-template>
+							### Pattern matching (JDK 17)
+
+							```
+							GreetingTarget tgt = ... 
+							switch (tgt) {
+								case World w -> out.println("Hello World");
+								case User u && u.name() == "..." -> out.println("Hello " + u.name());
+							}
+							```
+						</textarea>
+					</section>
+					<section data-markdown>
+						<textarea data-template>
+							### Pattern matching (JDK 19)
+
+							```
+							GreetingTarget tgt = ... 
+							switch (tgt) {
+								case World w -> out.println("Hello World");
+								case User(var name) when (u.name() == "...") -> out.println("Hello " + name);
+							}
+							```
+						</textarea>
+					</section>
+				</section>	
+
+
+
+
 
 			</div>
 		</div>

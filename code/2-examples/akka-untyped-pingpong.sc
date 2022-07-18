@@ -6,7 +6,7 @@ import akka.actor._
 case class Ping(count: Int)
 
 class Pingponger extends Actor {
-  def receive = {
+  def receive = { // Any => Unit
     case Ping(count) =>
       println(s"${self.path} received ping, count down $count")
 

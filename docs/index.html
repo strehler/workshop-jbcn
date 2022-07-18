@@ -279,7 +279,7 @@ send pid1, {:ping, 10, pid2}
 								case class Ping(count: Int)
 	
 								class Pingponger extends Actor {
-									def receive = {
+									def receive = { // Any => Unit
 										case Ping(count) =>
 											println(s"${self.path} received ping, count down $count")
 											if (count > 0) {

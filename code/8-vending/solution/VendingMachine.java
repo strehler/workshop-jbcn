@@ -39,9 +39,6 @@ public interface VendingMachine {
             }
         };
     }
-    static void onFirstCoin(int amount) {
-        out.println("Received first coin: " + amount);
-    }
 
     static Behavior<Vend> waitCoin(Address<Vend> self, int counter) {
         return message -> switch(message) {
@@ -56,8 +53,23 @@ public interface VendingMachine {
                 onLastCoin(count);
                 yield Become(vend(self, change));
             }
-            default -> Stay(); // ignore message, stay in this state
+            case Choice c -> Stay(); // ignore message, stay in this state
         };
+    }
+
+    static Behavior<Vend> vend(Address<Vend> self, int change) {
+        return message -> switch(message) {
+            case Choice c -> {
+                vendProduct(c.product());
+                releaseChange(change);
+                yield Become(initial(self));
+            }
+            case Coin c -> Stay(); // ignore message, stay in this state
+        };
+    }
+
+    static void onFirstCoin(int amount) {
+        out.println("Received first coin: " + amount);
     }
 
     static void onCoin(int count) {
@@ -67,19 +79,6 @@ public interface VendingMachine {
     static void onLastCoin(int count) {
         out.println("Received last coin: " + count + " of 100");
     }
-
-
-    static Behavior<Vend> vend(Address<Vend> self, int change) {
-        return message -> switch(message) {
-            case Choice c -> {
-                vendProduct(c.product());
-                releaseChange(change);
-                yield Become(initial(self));
-            }
-            default -> Stay(); // ignore message, stay in this state
-        };
-    }
-
 
     static void vendProduct(String product) {
         out.println("VENDING: " + product);

@@ -19,11 +19,11 @@
 //JAVA 19
 //JAVAC_OPTIONS --enable-preview --release 19
 //JAVA_OPTIONS  --enable-preview
-//SOURCES lib/Channels.java
-//SOURCES ChannelActor.java
-//SOURCES ../actor/TypedActor.java
+//SOURCES ../lib/Channels.java
+//SOURCES ../ChannelActor.java
+//SOURCES ../../actor/TypedActor.java
 
-package io.github.evacchi.typed.asyncchat;
+// package io.github.evacchi.typed.asyncchat;
 
 import io.github.evacchi.TypedActor;
 import io.github.evacchi.channels.Channels;

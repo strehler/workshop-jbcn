@@ -1,7 +1,7 @@
 //JAVA 19
 //JAVAC_OPTIONS --enable-preview --release 19
 //JAVA_OPTIONS  --enable-preview
-//SOURCES ../../actor/TypedActor.java
+//SOURCES ../actor/TypedActor.java
 package io.github.evacchi.typed.examples;
 
 import io.github.evacchi.TypedActor;
@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import static io.github.evacchi.TypedActor.*;
 import static java.lang.System.out;
 
-public interface VendingMachine {
+interface VendingMachine {
     sealed interface Vend {}
     static record Coin(int amount) implements Vend {
         public Coin {
@@ -23,7 +23,7 @@ public interface VendingMachine {
 
     static void main(String... args) {
         var actorSystem = new TypedActor.System(Executors.newCachedThreadPool());
-        Address<Vend> vendingMachine = actorSystem.actorOf(VendingMachineAlt::initial);
+        Address<Vend> vendingMachine = actorSystem.actorOf(VendingMachine::initial);
         vendingMachine
                 .tell(new Coin(50))
                 .tell(new Coin(40))
@@ -32,19 +32,21 @@ public interface VendingMachine {
     }
     static Behavior<Vend> initial(Address<Vend> self) {
         return message -> {
-            // ...
-            return Stay(); // ignore message, stay in this state
+            if (message instanceof Coin c) {
+                onFirstCoin(c.amount());
+                return Become(waitCoin(self, c.amount()));
+            } else return Stay(); // ignore message, stay in this state
         };
     }
-    static void onFirstCoin() {
-        out.println("Received first coin: " + c.amount);
+    static void onFirstCoin(int amount) {
+        out.println("Received first coin: " + amount);
     }
 
     static Behavior<Vend> waitCoin(Address<Vend> self, int counter) {
         return message -> switch(message) {
             case Coin c when counter + c.amount() < 100 -> {
                 // ...
-                yield Become(waitCoin(self, count));
+                yield Become(waitCoin(self, counter));
             }
             case Coin c -> {
                 // ...

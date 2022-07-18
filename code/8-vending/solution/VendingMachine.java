@@ -23,7 +23,7 @@ public interface VendingMachine {
 
     static void main(String... args) {
         var actorSystem = new TypedActor.System(Executors.newCachedThreadPool());
-        Address<Vend> vendingMachine = actorSystem.actorOf(VendingMachineAlt::initial);
+        Address<Vend> vendingMachine = actorSystem.actorOf(VendingMachine::initial);
         vendingMachine
                 .tell(new Coin(50))
                 .tell(new Coin(40))
@@ -31,25 +31,29 @@ public interface VendingMachine {
                 .tell(new Choice("Chocolate"));
     }
     static Behavior<Vend> initial(Address<Vend> self) {
-        return message -> {
-            if (message instanceof Coin c) {
-                onFirstCoin();
-                return Become(waitCoin(self, c.amount()));
-            } else return Stay(); // ignore message, stay in this state
+        return message -> switch (message) {
+            case Choice c -> Stay();
+            case Coin c -> {
+                onFirstCoin(c.amount());
+                yield Become(waitCoin(self, c.amount()));
+            }
         };
     }
-    static void onFirstCoin() {
-        out.println("Received first coin: " + c.amount);
+    static void onFirstCoin(int amount) {
+        out.println("Received first coin: " + amount);
     }
 
     static Behavior<Vend> waitCoin(Address<Vend> self, int counter) {
         return message -> switch(message) {
             case Coin c when counter + c.amount() < 100 -> {
-                // ...
+                var count = counter + c.amount();
+                onCoin(count);
                 yield Become(waitCoin(self, count));
             }
             case Coin c -> {
-                // ...
+                var count = counter + c.amount();
+                var change = counter + c.amount() - 100;
+                onLastCoin(count);
                 yield Become(vend(self, change));
             }
             default -> Stay(); // ignore message, stay in this state
@@ -68,7 +72,8 @@ public interface VendingMachine {
     static Behavior<Vend> vend(Address<Vend> self, int change) {
         return message -> switch(message) {
             case Choice c -> {
-                // ...
+                vendProduct(c.product());
+                releaseChange(change);
                 yield Become(initial(self));
             }
             default -> Stay(); // ignore message, stay in this state

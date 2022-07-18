@@ -5,13 +5,15 @@
 
 import static java.lang.System.*;
 
-public class selead {
+public class hello {
     sealed interface ToGreet {};
     record User(String name) implements ToGreet {};
     record World() implements ToGreet {};
 
     public static void main(String... args) {
-        var toGreet = args.length > 0 ? new User(args[0]) : new World();
-        out.println("Hello " + toGreet);
+        switch (args.length > 0 ? new User(args[0]) : new World()) {
+            case User(var name) when name != null -> out.println("Hello " + name);
+            default -> out.println("Hello World");
+        }
     }
 }

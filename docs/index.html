@@ -224,22 +224,22 @@
 								### Erlang
 						
 								```erlang
-								pingponger(Name, Main) ->
-									receive
-										{ping, Count, Ping_PID} ->
-											io:format("~s received ping, count down ~w~n", [Name, Count]),
-											if Count > 0 ->
-												Ping_PID ! {ping, Count - 1, self()},
-												pingponger(Name, Main);
-											true ->
-												exit ("done")
-											end
-									end.
-	
-								main(_) ->
-									Ping1_PID = spawn(fun() -> pingponger("pinger", self()) end),
-									Ping2_PID = spawn(fun() -> pingponger("ponger", self()) end),
-									Ping1_PID ! {ping, 10, Ping2_PID}.
+pingponger(Name, Main) ->
+  receive
+    {ping, Count, Ping_PID} ->
+      io:format("~s received ping, count down ~w~n", [Name, Count]),
+      if Count > 0 ->
+        Ping_PID ! {ping, Count - 1, self()},
+        pingponger(Name, Main);
+      true ->
+        exit ("done")
+      end
+  end.
+
+main(_) ->
+  Ping1_PID = spawn(fun() -> pingponger("pinger", self()) end),
+  Ping2_PID = spawn(fun() -> pingponger("ponger", self()) end),
+  Ping1_PID ! {ping, 10, Ping2_PID}.
 								```
 							</textarea>
 						</section>
@@ -249,24 +249,24 @@
 								### Elixir
 	
 								```elixir
-								defmodule Main do
-									def pingponger(name) do
-										receive do
-											{:ping, count, sender} ->
-												IO.puts "#{name} received ping, count down #{count}"
-												if count > 0 do
-													send sender, {:ping, count - 1, self()}
-													pingponger(name)
-												else
-													:ok
-												end
-										end
-									end
-								end
+defmodule Main do
+  def pingponger(name) do
+    receive do
+      {:ping, count, sender} ->
+        IO.puts "#{name} received ping, count down #{count}"
+        if count > 0 do
+          send sender, {:ping, count - 1, self()}
+          pingponger(name)
+        else
+          :ok
+        end
+    end
+  end
+end
 	
-								pid1 = spawn fn -> Main.pingponger("pinger") end
-								pid2 = spawn fn -> Main.pingponger("ponger") end
-								send pid1, {:ping, 10, pid2}
+pid1 = spawn fn -> Main.pingponger("pinger") end
+pid2 = spawn fn -> Main.pingponger("ponger") end
+send pid1, {:ping, 10, pid2}
 								```
 							</textarea>
 						</section>
@@ -340,7 +340,60 @@
 				<section>
 					<section data-markdown>
 						<textarea data-template>
-							### Java + Akka 
+            ### Java + Akka Protocol
+
+            ```java
+class Ping {
+    final int count;
+    ActorRef<Ping> replyTo;
+
+    Ping(int count, ActorRef<Ping> replyTo) {
+        this.count = count;
+        this.replyTo = replyTo;
+    }
+
+    int getCount() {
+        return count;
+    }
+
+    ActorRef<Ping> getReplyTo() {
+        return replyTo;
+    }
+}
+            ```
+						</textarea>
+					</section>
+
+					<section data-markdown>
+						<textarea data-template>
+            ### Java + Akka Implementation
+
+            ```java
+static class Pingponger extends AbstractActor {
+  @Override
+  public Receive createReceive() {
+    return receiveBuilder()
+      .match(
+        Ping.class,
+        ping -> {
+          out.println(getSelf().path() + " received ping, count down " + ping.getCount());
+          if (ping.getCount() > 0) {
+                      getSender().tell(new Ping(ping.getCount() - 1), getSelf());
+          } else {
+                      System.exit(0);
+          }
+        })
+      .build();
+  }
+}
+
+public static void main(String... args) {
+    ActorSystem system = ActorSystem.apply("pingpong");
+    ActorRef pinger = system.actorOf(Props.create(Pingponger.class), "pinger");
+    ActorRef ponger = system.actorOf(Props.create(Pingponger.class), "ponger");
+    pinger.tell(new Ping(10), ponger);
+}
+            ```
 						</textarea>
 					</section>
 
@@ -373,7 +426,7 @@
 
 								- no concise way to express messages
 								- no tidy syntax to match against the types of the incoming messages
-								- no tidy way to represent closed type hiearchies
+								- no tidy way to represent closed type hierarchies
 							
 						</textarea>
 					</section>
@@ -459,7 +512,7 @@
 							GreetingTarget tgt = ... 
 							switch (tgt) {
 								case World w -> out.println("Hello World");
-								case User(var name) when (u.name() == "...") -> out.println("Hello " + name);
+								case User(var name) when (name == "...") -> out.println("Hello " + name);
 							}
 							```
 						</textarea>

@@ -42,8 +42,8 @@ public interface TypedLoomActor {
     static <T> Effect<T> Die() { return Become(msg -> { out.println("Dropping msg [" + msg + "] due to severe case of death."); return Stay(); }); }
 
     record System() {
-        // private static ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
-        private static ExecutorService executorService = Executors.newFixedThreadPool(5); // clientManager + (2 threads X client)
+        private static ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+        // private static ExecutorService executorService = Executors.newFixedThreadPool(5); // clientManager + (2 threads X client)
 
         public <T> Address<T> actorOf(Function<Address<T>, Behavior<T>> initial) {
             abstract class RunnableAddress<T> implements Address<T>, Runnable { }

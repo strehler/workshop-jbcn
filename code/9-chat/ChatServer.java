@@ -75,7 +75,7 @@ public interface ChatServer {
         }
 
         Effect<ClientConnection> handler(Address<ClientConnection> self, ClientConnection conn) {
-            var channelActor = new ChannelActor<>(childrenManager, line -> new LineRead(line), conn.socket());
+            var channelActor = new ChannelActor<>(childrenManager, LineRead::new, conn.socket());
             Address<ChannelActor.ChannelProtocol> client =
                     system.actorOf(s -> channelActor.socketHandler(s));
             childrenManager.tell(new ClientConnected(client));

@@ -70,7 +70,7 @@ public interface ChatClient {
             case ClientConnection conn -> {
                 out.printf("Local connection....%s\n", conn.socket().localAddress());
                 out.printf("Remote connection...%s\n", conn.socket().remoteAddress());
-                var channelActor = new ChannelActor<>(self, line -> new LineRead(line), conn.socket());
+                var channelActor = new ChannelActor<>(self, LineRead::new, conn.socket());
                 Address<ChannelActor.ChannelProtocol> socket =
                         system.actorOf(s -> channelActor.socketHandler(s));
                 yield Become(m -> clientReady(socket, m));

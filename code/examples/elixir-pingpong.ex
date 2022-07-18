@@ -1,26 +1,19 @@
 #! /usr/bin/env elixir
 
-defmodule Pingponger do
-  def apply(name) do
+defmodule Main do
+  def pingponger(name) do
     receive do
       {:ping, count, sender} ->
         IO.puts "#{name} received ping, count down #{count}"
         if count > 0 do
           send sender, {:ping, count - 1, self()}
-          apply(name)
+          pingponger(name)
         else
           :ok
         end
     end
   end
-end
 
-pid1 = spawn fn -> Pingponger.apply("pinger") end
-pid2 = spawn fn -> Pingponger.apply("ponger") end
-
-send pid1, {:ping, 10, pid2}
-
-defmodule Main do
   def wait(pid) do
     wait(pid, true)
   end
@@ -34,5 +27,10 @@ defmodule Main do
     end
   end
 end
+
+pid1 = spawn fn -> Main.pingponger("pinger") end
+pid2 = spawn fn -> Main.pingponger("ponger") end
+
+send pid1, {:ping, 10, pid2}
 
 Main.wait(pid1)

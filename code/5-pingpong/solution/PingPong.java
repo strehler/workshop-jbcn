@@ -1,7 +1,7 @@
 //JAVA 19
 //JAVAC_OPTIONS --enable-preview --release 19
 //JAVA_OPTIONS  --enable-preview
-//SOURCES ../actor/TypedActor.java
+//SOURCES TypedActor.java
 package io.github.evacchi.typed.examples;
 
 import io.github.evacchi.TypedActor;
@@ -26,9 +26,28 @@ public interface PingPong {
         ponger.tell(new Ping(pinger));
     }
     static Effect<Ping> pongerBehavior(Address<Ping> self, Ping msg, int counter) {
-        return Stay();
+        if (counter < 10) {
+            out.println("ping! 👉");
+            msg.sender().tell(new SimplePong(self));
+            return Become(m -> pongerBehavior(self, m, counter + 1));
+        } else {
+            out.println("ping! 💀");
+            msg.sender().tell(new DeadlyPong(self));
+            return Die();
+        }
     }
     static Effect<Pong> pingerBehavior(Address<Pong> self, Pong msg) {
-        return Stay();
+        return switch (msg) {
+            case SimplePong p -> {
+                out.println("pong! 👈");
+                p.sender().tell(new Ping(self));
+                yield Stay();
+            }
+            case DeadlyPong p -> {
+                out.println("pong! 😵");
+                p.sender().tell(new Ping(self));
+                yield Die();
+            }
+        };
     }
 }

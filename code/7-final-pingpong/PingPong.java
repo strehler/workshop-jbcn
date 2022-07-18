@@ -1,7 +1,7 @@
 //JAVA 19
 //JAVAC_OPTIONS --enable-preview --release 19
 //JAVA_OPTIONS  --enable-preview
-//SOURCES ../../actor/TypedActor.java
+//SOURCES TypedActor.java
 package io.github.evacchi.typed.examples;
 
 import io.github.evacchi.TypedActor;

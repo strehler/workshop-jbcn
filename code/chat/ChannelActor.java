@@ -17,8 +17,6 @@
  */
 //SOURCES lib/Channels.java
 
-package io.github.evacchi.typed.asyncchat;
-
 import io.github.evacchi.channels.Channels;
 
 import java.nio.charset.StandardCharsets;

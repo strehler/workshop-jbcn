@@ -23,8 +23,6 @@
 //SOURCES ../actor/TypedActor.java
 //DEPS com.fasterxml.jackson.core:jackson-databind:2.13.0
 
-package io.github.evacchi.typed.asyncchat;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.evacchi.TypedActor;

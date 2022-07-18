@@ -12,8 +12,8 @@ public class hello {
 
     public static void main(String... args) {
         switch (args.length > 0 ? new User(args[0]) : new World()) {
-            case User(var name) when name != null -> out.println("Hello " + name);
-            default -> out.println("Hello World");
+            case User(var name) -> out.println("Hello " + name);
+            case World w -> out.println("Hello World!");
         }
     }
 }

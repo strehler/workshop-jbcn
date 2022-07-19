@@ -11,12 +11,8 @@ import java.util.function.Function;
 import static java.lang.System.out;
 
 public interface TypedActor {
-    interface Effect<T> {
-        Behavior<T> transition(Behavior<T> next);
-    }
-    interface Behavior<T> {
-        Effect<T> receive(T o);
-    }
+    interface Effect<T> { Behavior<T> transition(Behavior<T> next); }
+    interface Behavior<T> { Effect<T> receive(T o); }
     interface Address<T> { Address<T> tell(T msg); }
 
     static <T> Effect<T> Become(Behavior<T> next) { return current -> next; }

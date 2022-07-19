@@ -168,10 +168,45 @@
 					<section data-markdown>
 						<!-- practical example, test jbang env -->
 						<textarea data-template>
-							Ping Pong!
+						```java
+sealed interface Pong {}
+record SimplePong(Address<Ping> sender, int count) implements Pong {}
+record DeadlyPong(Address<Ping> sender) implements Pong {}
+
+record Ping(Address<Pong> sender, int count) {}
+
+static void main(String... args) {
+    var actorSystem = new TypedActor.System(Executors.newCachedThreadPool());
+    Address<Ping> ponger = actorSystem.actorOf(self -> msg -> pongerBehavior(self, msg));
+    Address<Pong> pinger = actorSystem.actorOf(self -> msg -> pingerBehavior(self, msg));
+    ponger.tell(new Ping(pinger, 10));
+}
+static Effect<Ping> pongerBehavior(Address<Ping> self, Ping msg) {
+    if (msg.count() > 0) {
+        out.println("ping! 👉");
+        msg.sender().tell(new SimplePong(self, msg.count() - 1));
+        return Stay();
+    } else {
+        out.println("ping! 💀");
+        msg.sender().tell(new DeadlyPong(self));
+        return Die();
+    }
+}
+static Effect<Pong> pingerBehavior(Address<Pong> self, Pong msg) {
+    return switch (msg) {
+        case SimplePong(var sender, var count) -> {
+            out.println("pong! 👈");
+            sender.tell(new Ping(self, count - 1));
+            yield Stay();
+        }
+        case DeadlyPong p -> {
+            out.println("pong! 😵");
+            yield Die();
+        }
+    };
+}
 						</textarea>
 					</section>
-
 
 					<section data-markdown>
 						<textarea data-template>
@@ -332,7 +367,6 @@ send pid1, {:ping, 10, pid2}
 						</section>
 					</section>
 	
-
 				<!--  THE ISSUE: JDK PRE-17 WITH ACTORS SUCKS -->
 				<section>
 					<section data-markdown>
@@ -571,11 +605,23 @@ public static void main(String... args) {
 				</section>
 			</section>
 
-				<section data-markdown>
-					<textarea data-template>
-						![](imgs/voxxed.png)
-					</textarea>
-				</section>
+      <section data-markdown>
+        <textarea data-template>
+          # LIVE CODING
+        </textarea>
+      </section>
+
+      <section data-markdown>
+        <textarea data-template>
+          ![](imgs/voxxed.png)
+        </textarea>
+      </section>
+
+      <section data-markdown>
+        <textarea data-template>
+          # END
+        </textarea>
+      </section>
 
 			</div>
 		</div>

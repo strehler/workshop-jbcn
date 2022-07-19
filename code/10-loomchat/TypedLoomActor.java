@@ -25,5 +25,4 @@ public interface TypedLoomActor {
             return null;
         }
     }
-
 }

@@ -16,5 +16,5 @@ Code is in the `code` folder and solutions are in the `solution`s subfolders, do
 - install jbang and JDK 19
 - https://www.jbang.dev/documentation/guide/latest/installation.html
 - `sdk install jbang`
-- `sdk install java 19.ea.31`
+- `sdk install java 19.ea.31-open`
 - `git clone git@github.com:strehler/workshop-jbcn.git`
